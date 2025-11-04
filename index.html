@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>图片上传与生成</title>
     <style>
         * {
@@ -661,8 +664,12 @@
                 // 详细错误诊断
                 let errorMessage = '❌ 请求失败: ' + err.message;
                 
+                // 检查是否是GET/HEAD方法错误（通常是缓存问题）
+                if (err.message.includes('GET/HEAD method cannot have body') || err.message.includes('Request with GET/HEAD')) {
+                    errorMessage += '\n\n⚠️ 这是浏览器缓存问题！\n\n解决方案：\n1. 按 Ctrl+F5 (Windows) 或 Cmd+Shift+R (Mac) 强制刷新\n2. 或清除浏览器缓存\n3. 或在开发者工具中禁用缓存\n   (F12 → Network标签 → 勾选"Disable cache")\n4. 然后刷新页面重试';
+                }
                 // 检查是否是CORS或网络问题
-                if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+                else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
                     const isHttps = window.location.protocol === 'https:';
                     const isHttpWebhook = WEBHOOK_URL.startsWith('http://');
                     
