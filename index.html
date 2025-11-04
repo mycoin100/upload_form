@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片上传与生成</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+            /* 粉红色渐变背景 - 匹配图片主题 */
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 25%, #ffa8c5 50%, #e91e63 75%, #c2185b 100%);
+            /* 或者使用更柔和的版本 */
+            /* background: linear-gradient(135deg, #ffb3d9 0%, #ff8fab 50%, #ff6b9d 100%); */
+            min-height: 100vh;
+            max-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 添加装饰性背景元素 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: float 20s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(50px, 50px);
+            }
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(233, 30, 99, 0.3), 0 8px 20px rgba(194, 24, 91, 0.2);
+            max-width: 480px;
+            width: 100%;
+            max-height: 95vh;
+            padding: 20px 24px;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* 自定义滚动条样式 */
+        .container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #ff6b9d 0%, #e91e63 100%);
+            border-radius: 3px;
+        }
+
+        .container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b9d 0%, #e91e63 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 18px;
+            font-size: 12px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .required-mark {
+            color: #e91e63;
+            margin-left: 4px;
+        }
+
+        input[type="file"],
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #ffe0e6;
+            border-radius: 10px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            background: #fff;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        textarea {
+            min-height: 70px;
+            max-height: 120px;
+            line-height: 1.4;
+            padding: 10px 12px;
+        }
+
+        textarea[readonly] {
+            background-color: #f9f9f9;
+            cursor: default;
+            color: #333;
+        }
+
+        textarea[readonly]:focus {
+            outline: none;
+            border-color: #ff6b9d;
+            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
+        }
+
+        input[type="file"]:hover,
+        input[type="text"]:hover,
+        textarea:hover {
+            border-color: #ffb3d9;
+        }
+
+        input[type="file"]:focus,
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #ff6b9d;
+            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
+        }
+
+        /* 错误状态样式 */
+        input[type="file"].error,
+        input[type="text"].error {
+            border-color: #e91e63;
+            background-color: #fff5f7;
+            box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+        }
+
+        input[type="file"].error:focus,
+        input[type="text"].error:focus {
+            border-color: #c2185b;
+            box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.2);
+        }
+
+        /* 错误提示信息 */
+        .error-message {
+            display: none;
+            margin-top: 6px;
+            padding: 6px 10px;
+            background: linear-gradient(135deg, #fff5f7 0%, #ffe0e6 100%);
+            color: #c2185b;
+            border: 1px solid #ffb3d9;
+            border-radius: 6px;
+            font-size: 12px;
+            animation: shake 0.3s ease;
+            line-height: 1.4;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-5px);
+            }
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        button {
+            width: 100%;
+            /* 粉红色渐变按钮 - 匹配图片主题 */
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #e91e63 100%);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 12px rgba(255, 107, 157, 0.4);
+            position: relative;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255, 107, 157, 0.5);
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: linear-gradient(135deg, #ffb3d9 0%, #ffc1e0 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        #result {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: none;
+            animation: slideIn 0.3s ease;
+            line-height: 1.4;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #result.show {
+            display: block;
+        }
+
+        .success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .info {
+            background: linear-gradient(135deg, #fff0f5 0%, #ffe0e6 100%);
+            color: #c2185b;
+            border: 2px solid #ffb3d9;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-name {
+            margin-top: 6px;
+            font-size: 11px;
+            color: #666;
+            padding-left: 4px;
+            line-height: 1.3;
+        }
+
+        /* 文件输入框样式优化 */
+        input[type="file"] {
+            cursor: pointer;
+        }
+
+        input[type="file"]::-webkit-file-upload-button {
+            background: linear-gradient(135deg, #ff6b9d 0%, #e91e63 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 12px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="file"]::-webkit-file-upload-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            body {
+                padding: 8px;
+            }
+
+            .container {
+                padding: 16px 18px;
+                border-radius: 12px;
+                max-height: 98vh;
+            }
+
+            h1 {
+                font-size: 20px;
+                margin-bottom: 4px;
+            }
+
+            .subtitle {
+                font-size: 11px;
+                margin-bottom: 14px;
+            }
+
+            .form-group {
+                margin-bottom: 14px;
+            }
+
+            label {
+                font-size: 12px;
+                margin-bottom: 5px;
+            }
+
+            input[type="file"],
+            input[type="text"],
+            textarea {
+                padding: 9px 11px;
+                font-size: 12px;
+            }
+
+            textarea {
+                min-height: 60px;
+                max-height: 100px;
+            }
+
+            button {
+                padding: 11px;
+                font-size: 13px;
+            }
+
+            .error-message {
+                font-size: 11px;
+                padding: 5px 9px;
+            }
+        }
+
+        /* 小屏幕优化 */
+        @media (max-height: 700px) {
+            .container {
+                padding: 16px 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+                margin-bottom: 4px;
+            }
+
+            .subtitle {
+                font-size: 11px;
+                margin-bottom: 14px;
+            }
+
+            .form-group {
+                margin-bottom: 12px;
+            }
+
+            textarea {
+                min-height: 60px;
+                max-height: 90px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 图片上传与生成</h1>
+        <p class="subtitle">上传您的图片并输入验证码，生成定制化内容</p>
+
+        <form id="uploadForm" novalidate>
+            <div class="form-group">
+                <label for="fileInput">📁 选择图片<span class="required-mark">*</span></label>
+                <div class="file-input-wrapper">
+                    <input type="file" id="fileInput" name="file" accept="image/*" required>
+                </div>
+                <div class="file-name" id="fileName"></div>
+                <div class="error-message" id="fileError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="codeInput">🔑 验证码<span class="required-mark">*</span></label>
+                <input type="text" id="codeInput" name="code" placeholder="请输入验证码" required>
+                <div class="error-message" id="codeError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="messageInput">📝 返回信息</label>
+                <textarea id="messageInput" name="message" rows="3" placeholder="这里将显示服务器返回的错误或提示信息..." readonly></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                <span id="btnText">提交并生成</span>
+            </button>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // ⚠️ 重要：请将下面的 URL 替换为你的实际 n8n Webhook URL
+        const WEBHOOK_URL = 'http://144.126.135.213:5678/webhook-test/0b759f7f-0711-4ddb-959b-123ff4cca3e0';
+
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const codeInput = document.getElementById('codeInput');
+        const messageInput = document.getElementById('messageInput');
+        const fileName = document.getElementById('fileName');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const resultDiv = document.getElementById('result');
+        const fileError = document.getElementById('fileError');
+        const codeError = document.getElementById('codeError');
+
+        // 验证函数
+        function validateForm() {
+            let isValid = true;
+            let firstErrorField = null;
+
+            // 验证图片文件
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showError(fileInput, fileError, '请选择要上传的图片');
+                isValid = false;
+                if (!firstErrorField) firstErrorField = fileInput;
+            } else {
+                clearError(fileInput, fileError);
+            }
+
+            // 验证验证码
+            const codeValue = codeInput.value.trim();
+            if (!codeValue) {
+                showError(codeInput, codeError, '请输入验证码');
+                isValid = false;
+                if (!firstErrorField) firstErrorField = codeInput;
+            } else {
+                clearError(codeInput, codeError);
+            }
+
+            // 如果有错误，滚动到第一个错误字段
+            if (!isValid && firstErrorField) {
+                firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstErrorField.focus();
+            }
+
+            return isValid;
+        }
+
+        // 显示错误
+        function showError(input, errorDiv, message) {
+            input.classList.add('error');
+            errorDiv.textContent = '⚠️ ' + message;
+            errorDiv.classList.add('show');
+        }
+
+        // 清除错误
+        function clearError(input, errorDiv) {
+            input.classList.remove('error');
+            errorDiv.classList.remove('show');
+            errorDiv.textContent = '';
+        }
+
+        // 显示选中的文件名
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileName.textContent = `已选择: ${e.target.files[0].name}`;
+                clearError(fileInput, fileError);
+            } else {
+                fileName.textContent = '';
+            }
+        });
+
+        // 验证码输入时清除错误
+        codeInput.addEventListener('input', (e) => {
+            if (e.target.value.trim()) {
+                clearError(codeInput, codeError);
+            }
+        });
+
+        // 验证码失去焦点时验证
+        codeInput.addEventListener('blur', (e) => {
+            if (!e.target.value.trim()) {
+                showError(codeInput, codeError, '请输入验证码');
+            }
+        });
+
+        // 文件输入失去焦点时验证
+        fileInput.addEventListener('blur', (e) => {
+            if (!e.target.files || e.target.files.length === 0) {
+                showError(fileInput, fileError, '请选择要上传的图片');
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // 先验证表单
+            if (!validateForm()) {
+                return;
+            }
+
+            // 禁用按钮
+            submitBtn.disabled = true;
+            btnText.textContent = '处理中...';
+            resultDiv.className = 'info show';
+            resultDiv.textContent = '⏳ 正在上传并处理，请稍候...';
+            // 清空并显示处理中信息
+            messageInput.value = '⏳ 正在上传并处理，请稍候...';
+            messageInput.style.borderColor = '#ffb3d9';
+
+            try {
+                const fd = new FormData(form);
+
+                const resp = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    body: fd
+                });
+
+                if (!resp.ok) {
+                    throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+                }
+
+                const contentType = resp.headers.get('Content-Type') || '';
+
+                if (contentType.startsWith('image/') || contentType.startsWith('application/octet-stream')) {
+                    // 返回的是文件
+                    const blob = await resp.blob();
+                    const disposition = resp.headers.get('Content-Disposition') || '';
+                    let filename = 'generated_image.png';
+                    const match = disposition.match(/filename="(.+)"/);
+                    if (match) filename = match[1];
+
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+
+                    const successMessage = '✅ 生成成功！文件已开始下载。';
+                    resultDiv.className = 'success show';
+                    resultDiv.textContent = successMessage;
+                    messageInput.value = successMessage;
+                    messageInput.style.borderColor = '#c3e6cb';
+                    form.reset();
+                    fileName.textContent = '';
+                    // 注意：form.reset()会清空所有输入，所以需要重新设置messageInput的值
+                    setTimeout(() => {
+                        messageInput.value = successMessage;
+                    }, 0);
+                } else if (contentType.includes('application/json')) {
+                    // 返回的是 JSON（可能是错误或提示信息）
+                    const data = await resp.json();
+                    
+                    // 提取返回信息（优先使用response字段，然后是message）
+                    let message = '';
+                    if (data.response) {
+                        message = data.response;
+                    } else if (data.message) {
+                        message = data.message;
+                    } else if (data.error) {
+                        message = data.error;
+                    } else {
+                        message = JSON.stringify(data, null, 2);
+                    }
+
+                    if (data.success === false || data.error) {
+                        const errorMessage = '❌ ' + message;
+                        resultDiv.className = 'error show';
+                        resultDiv.textContent = errorMessage;
+                        messageInput.value = errorMessage;
+                        messageInput.style.borderColor = '#f5c6cb';
+                    } else {
+                        const successMessage = '✅ ' + message;
+                        resultDiv.className = 'success show';
+                        resultDiv.textContent = successMessage;
+                        messageInput.value = successMessage;
+                        messageInput.style.borderColor = '#c3e6cb';
+                    }
+                } else if (contentType.includes('text/html') || contentType.includes('text/plain')) {
+                    // 返回的是文本或HTML
+                    const text = await resp.text();
+                    resultDiv.className = 'info show';
+                    resultDiv.textContent = '📄 服务器返回信息：';
+                    messageInput.value = text;
+                    messageInput.style.borderColor = '#ffb3d9';
+                } else {
+                    const errorMessage = '❌ 未知响应类型: ' + contentType;
+                    resultDiv.className = 'error show';
+                    resultDiv.textContent = errorMessage;
+                    messageInput.value = errorMessage;
+                    messageInput.style.borderColor = '#f5c6cb';
+                }
+            } catch (err) {
+                const errorMessage = '❌ 请求失败: ' + err.message;
+                resultDiv.className = 'error show';
+                resultDiv.textContent = errorMessage;
+                messageInput.value = errorMessage;
+                messageInput.style.borderColor = '#f5c6cb';
+            } finally {
+                submitBtn.disabled = false;
+                btnText.textContent = '提交并生成';
+            }
+        });
+    </script>
+</body>
+</html>
+
