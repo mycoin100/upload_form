@@ -576,7 +576,7 @@
                 const fd = new FormData(form);
 
                 const resp = await fetch(WEBHOOK_URL, {
-                    method: 'GET',
+                    method: 'POST',
                     body: fd
                 });
 
@@ -658,7 +658,23 @@
                     messageInput.style.borderColor = '#f5c6cb';
                 }
             } catch (err) {
-                const errorMessage = '❌ 请求失败: ' + err.message;
+                // 详细错误诊断
+                let errorMessage = '❌ 请求失败: ' + err.message;
+                
+                // 检查是否是CORS或网络问题
+                if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+                    const isHttps = window.location.protocol === 'https:';
+                    const isHttpWebhook = WEBHOOK_URL.startsWith('http://');
+                    
+                    if (isHttps && isHttpWebhook) {
+                        errorMessage += '\n\n⚠️ 混合内容错误：\n页面使用HTTPS，但Webhook使用HTTP。\n浏览器会阻止HTTP请求。\n\n解决方案：\n1. 将N8N配置为使用HTTPS\n2. 或使用HTTP页面（不推荐）';
+                    } else if (err.message.includes('CORS')) {
+                        errorMessage += '\n\n⚠️ CORS错误：\n服务器未允许跨域请求。\n请检查N8N的CORS设置。';
+                    } else {
+                        errorMessage += '\n\n可能的原因：\n1. 网络连接问题\n2. Webhook URL不正确\n3. N8N服务器未运行\n4. 防火墙阻止了请求';
+                    }
+                }
+                
                 resultDiv.className = 'error show';
                 resultDiv.textContent = errorMessage;
                 messageInput.value = errorMessage;
