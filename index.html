@@ -576,7 +576,7 @@
                 const fd = new FormData(form);
 
                 const resp = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
+                    method: 'GET',
                     body: fd
                 });
 
