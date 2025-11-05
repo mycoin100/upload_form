@@ -16,9 +16,9 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
-            /* 粉红色渐变背景 - 匹配图片主题 */
+            /* 💕 超美的粉红渐变背景呀！像梦幻的糖果世界～ */
             background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 25%, #ffa8c5 50%, #e91e63 75%, #c2185b 100%);
-            /* 或者使用更柔和的版本 */
+            /* 💝 想要更温柔的感觉？试试这个柔和版～ */
             /* background: linear-gradient(135deg, #ffb3d9 0%, #ff8fab 50%, #ff6b9d 100%); */
             min-height: 100vh;
             max-height: 100vh;
@@ -30,7 +30,7 @@
             overflow: hidden;
         }
 
-        /* 添加装饰性背景元素 */
+        /* ✨ 给背景加点小星星装饰，blingbling的～ */
         body::before {
             content: '';
             position: absolute;
@@ -171,7 +171,7 @@
             box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
         }
 
-        /* 错误状态样式 */
+        /* 🙈 哎呀，出错啦！红红的提示你注意哦～ */
         input[type="file"].error,
         input[type="text"].error {
             border-color: #e91e63;
@@ -185,7 +185,7 @@
             box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.2);
         }
 
-        /* 错误提示信息 */
+        /* 💌 温柔的错误提示，不要害怕哦～ */
         .error-message {
             display: none;
             margin-top: 6px;
@@ -203,6 +203,7 @@
             display: block;
         }
 
+        /* 🎀 轻轻摇一摇，提醒你填写信息～ */
         @keyframes shake {
             0%, 100% {
                 transform: translateX(0);
@@ -217,7 +218,7 @@
 
         button {
             width: 100%;
-            /* 粉红色渐变按钮 - 匹配图片主题 */
+            /* 💗 超级可爱的粉红按钮！点击就有魔法～ */
             background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #e91e63 100%);
             color: white;
             padding: 12px;
@@ -433,12 +434,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎨 图片上传与生成</h1>
-        <p class="subtitle">上传您的图片并输入验证码，生成定制化内容</p>
+        <h1>✨ AI魔法工坊 ✨</h1>
+        <p class="subtitle">上传你的美照，输入神秘验证码，见证魔法时刻～ 💖</p>
 
         <form id="uploadForm" novalidate>
             <div class="form-group">
-                <label for="fileInput">📁 选择图片<span class="required-mark">*</span></label>
+                <label for="fileInput">📸 选择你的美美照片<span class="required-mark">*</span></label>
                 <div class="file-input-wrapper">
                     <input type="file" id="fileInput" name="file" accept="image/*" required>
                 </div>
@@ -447,18 +448,13 @@
             </div>
 
             <div class="form-group">
-                <label for="codeInput">🔑 验证码<span class="required-mark">*</span></label>
-                <input type="text" id="codeInput" name="code" placeholder="请输入验证码" required>
+                <label for="codeInput">🔮 神秘验证码<span class="required-mark">*</span></label>
+                <input type="text" id="codeInput" name="code" placeholder="输入你的专属验证码哦～" required>
                 <div class="error-message" id="codeError"></div>
             </div>
 
-            <div class="form-group">
-                <label for="messageInput">📝 返回信息</label>
-                <textarea id="messageInput" name="message" rows="3" placeholder="这里将显示服务器返回的错误或提示信息..." readonly></textarea>
-            </div>
-
             <button type="submit" id="submitBtn">
-                <span id="btnText">提交并生成</span>
+                <span id="btnText">✨ 开始施展魔法 ✨</span>
             </button>
         </form>
 
@@ -466,13 +462,17 @@
     </div>
 
     <script>
-        // ⚠️ 重要：请将下面的 URL 替换为你的实际 n8n Webhook URL
-        const WEBHOOK_URL = 'http://144.126.135.213:5678/webhook-test/0b759f7f-0711-4ddb-959b-123ff4cca3e0';
+        // 🌟 魔法传送门地址！这是我们跟服务器小姐姐联系的秘密通道～
+        // 📝 小贴士：这个地址是从 N8N 工作流里拿到的哦
+        // 🎯 Form Trigger 方式（更适合可爱的表单提交呢！）
+        //const WEBHOOK_URL = 'http://144.126.135.213:5678/form/83a46d1f-b9d1-4883-9375-02d6a2d5efb0';
+        
+        // 💫 Webhook 方式（我们现在用的是这个啦～）
+        const WEBHOOK_URL = 'http://144.126.135.213:5678/webhook/0b759f7f-0711-4ddb-959b-123ff4cca3e0';
 
         const form = document.getElementById('uploadForm');
         const fileInput = document.getElementById('fileInput');
         const codeInput = document.getElementById('codeInput');
-        const messageInput = document.getElementById('messageInput');
         const fileName = document.getElementById('fileName');
         const submitBtn = document.getElementById('submitBtn');
         const btnText = document.getElementById('btnText');
@@ -480,31 +480,31 @@
         const fileError = document.getElementById('fileError');
         const codeError = document.getElementById('codeError');
 
-        // 验证函数
+        // 🔍 检查小助手：帮你确认信息都填好了没～
         function validateForm() {
             let isValid = true;
             let firstErrorField = null;
 
-            // 验证图片文件
+            // 📸 看看有没有选美美的图片呀
             if (!fileInput.files || fileInput.files.length === 0) {
-                showError(fileInput, fileError, '请选择要上传的图片');
+                showError(fileInput, fileError, '还没选照片呢！快选一张美美的吧～');
                 isValid = false;
                 if (!firstErrorField) firstErrorField = fileInput;
             } else {
                 clearError(fileInput, fileError);
             }
 
-            // 验证验证码
+            // 🔑 验证码不能空着哦，不然没法验证身份呢
             const codeValue = codeInput.value.trim();
             if (!codeValue) {
-                showError(codeInput, codeError, '请输入验证码');
+                showError(codeInput, codeError, '验证码不能空着哦，快填上吧！');
                 isValid = false;
                 if (!firstErrorField) firstErrorField = codeInput;
             } else {
                 clearError(codeInput, codeError);
             }
 
-            // 如果有错误，滚动到第一个错误字段
+            // 🎪 如果有小错误，就轻轻跳到那里提醒你～
             if (!isValid && firstErrorField) {
                 firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 firstErrorField.focus();
@@ -513,67 +513,61 @@
             return isValid;
         }
 
-        // 显示错误
+        // 💔 显示错误提示（不要担心，修改一下就好啦！）
         function showError(input, errorDiv, message) {
             input.classList.add('error');
             errorDiv.textContent = '⚠️ ' + message;
             errorDiv.classList.add('show');
         }
 
-        // 清除错误
+        // ✨ 清除错误（棒棒哒！都改对了～）
         function clearError(input, errorDiv) {
             input.classList.remove('error');
             errorDiv.classList.remove('show');
             errorDiv.textContent = '';
         }
 
-        // 显示选中的文件名
+        // 📁 哇！看看你选了什么图片～
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
-                fileName.textContent = `已选择: ${e.target.files[0].name}`;
+                fileName.textContent = `✓ 已选择：${e.target.files[0].name}`;
                 clearError(fileInput, fileError);
             } else {
                 fileName.textContent = '';
             }
         });
 
-        // 验证码输入时清除错误
+        // ⌨️ 正在输入验证码...错误提示消失啦！
         codeInput.addEventListener('input', (e) => {
             if (e.target.value.trim()) {
                 clearError(codeInput, codeError);
             }
         });
 
-        // 验证码失去焦点时验证
+        // 👀 验证码输入完了吗？让我检查一下～
         codeInput.addEventListener('blur', (e) => {
             if (!e.target.value.trim()) {
-                showError(codeInput, codeError, '请输入验证码');
+                showError(codeInput, codeError, '验证码不能空着哦，快填上吧！');
             }
         });
 
-        // 文件输入失去焦点时验证
-        fileInput.addEventListener('blur', (e) => {
-            if (!e.target.files || e.target.files.length === 0) {
-                showError(fileInput, fileError, '请选择要上传的图片');
-            }
-        });
+        // 💡 小秘密：不在点击文件按钮时验证哦
+        // 因为那时候你还在挑图片呢，不要打扰你选择～
+        // 等提交的时候再一起检查就好啦！
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // 先验证表单
+            // 🎯 先确认一下信息都填好了哦
             if (!validateForm()) {
                 return;
             }
 
-            // 禁用按钮
+            // 🚀 按钮暂时休息，防止你不小心重复点击～
             submitBtn.disabled = true;
-            btnText.textContent = '处理中...';
+            btnText.textContent = '✨ 施法中...';
             resultDiv.className = 'info show';
-            resultDiv.textContent = '⏳ 正在上传并处理，请稍候...';
-            // 清空并显示处理中信息
-            messageInput.value = '⏳ 正在上传并处理，请稍候...';
-            messageInput.style.borderColor = '#ffb3d9';
+            resultDiv.textContent = '💫 魔法正在施展中，请稍等片刻哦～';
 
             try {
                 const fd = new FormData(form);
@@ -583,14 +577,52 @@
                     body: fd
                 });
 
-                if (!resp.ok) {
-                    throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
-                }
-
                 const contentType = resp.headers.get('Content-Type') || '';
 
+                // 🔍 看看服务器小姐姐回复了什么～
+                if (!resp.ok) {
+                    // 💬 如果是 JSON 格式，我们来看看错误信息
+                    if (contentType.includes('application/json')) {
+                        try {
+                            const errorData = await resp.json();
+                            let errorMessage = '';
+                            
+                            // 🔎 寻找错误信息藏在哪里～
+                            if (errorData.message) {
+                                errorMessage = errorData.message;
+                            } else if (errorData.error) {
+                                errorMessage = errorData.error;
+                            } else {
+                                errorMessage = JSON.stringify(errorData, null, 2);
+                            }
+                            
+                            // 📝 整理一下错误信息，让它更容易理解～
+                            let fullMessage = `💔 ${errorMessage}`;
+                            if (errorData.error && errorData.error !== errorMessage) {
+                                fullMessage += `\n\n错误类型: ${errorData.error}`;
+                            }
+                            if (errorData.submittedCaptcha) {
+                                fullMessage += `\n\n你输入的验证码: ${errorData.submittedCaptcha}`;
+                            }
+                            
+                            // 💖 温柔地告诉你哪里需要改一下
+                            resultDiv.className = 'error show';
+                            resultDiv.textContent = fullMessage;
+                            
+                            return; // 🛑 到这里就好啦，不用继续了～
+                        } catch (parseError) {
+                            // 😵 哎呀，服务器说了奇怪的话，我听不懂...
+                            throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+                        }
+                    } else {
+                        // 🤔 服务器返回的不是我认识的格式呢...
+                        throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+                    }
+                }
+
+                // 🎉 太好啦！服务器说一切顺利～
                 if (contentType.startsWith('image/') || contentType.startsWith('application/octet-stream')) {
-                    // 返回的是文件
+                    // 🖼️ 哇！是图片文件呢，准备下载啦～
                     const blob = await resp.blob();
                     const disposition = resp.headers.get('Content-Disposition') || '';
                     let filename = 'generated_image.png';
@@ -606,22 +638,16 @@
                     a.remove();
                     URL.revokeObjectURL(url);
 
-                    const successMessage = '✅ 生成成功！文件已开始下载。';
+                    const successMessage = '🎉 耶！魔法成功啦！你的文件正在下载～';
                     resultDiv.className = 'success show';
                     resultDiv.textContent = successMessage;
-                    messageInput.value = successMessage;
-                    messageInput.style.borderColor = '#c3e6cb';
                     form.reset();
                     fileName.textContent = '';
-                    // 注意：form.reset()会清空所有输入，所以需要重新设置messageInput的值
-                    setTimeout(() => {
-                        messageInput.value = successMessage;
-                    }, 0);
                 } else if (contentType.includes('application/json')) {
-                    // 返回的是 JSON（可能是错误或提示信息）
+                    // 📦 收到 JSON 格式的回复～看看里面说了什么
                     const data = await resp.json();
                     
-                    // 提取返回信息（优先使用response字段，然后是message）
+                    // 🔍 找找重要信息在哪里～
                     let message = '';
                     if (data.response) {
                         message = data.response;
@@ -634,61 +660,53 @@
                     }
 
                     if (data.success === false || data.error) {
-                        const errorMessage = '❌ ' + message;
+                        const errorMessage = '💔 ' + message;
                         resultDiv.className = 'error show';
                         resultDiv.textContent = errorMessage;
-                        messageInput.value = errorMessage;
-                        messageInput.style.borderColor = '#f5c6cb';
                     } else {
-                        const successMessage = '✅ ' + message;
+                        const successMessage = '🎉 ' + message;
                         resultDiv.className = 'success show';
                         resultDiv.textContent = successMessage;
-                        messageInput.value = successMessage;
-                        messageInput.style.borderColor = '#c3e6cb';
                     }
                 } else if (contentType.includes('text/html') || contentType.includes('text/plain')) {
-                    // 返回的是文本或HTML
+                    // 📝 收到文字消息～
                     const text = await resp.text();
                     resultDiv.className = 'info show';
-                    resultDiv.textContent = '📄 服务器返回信息：';
-                    messageInput.value = text;
-                    messageInput.style.borderColor = '#ffb3d9';
+                    resultDiv.textContent = '💌 服务器小姐姐说：\n\n' + text;
                 } else {
-                    const errorMessage = '❌ 未知响应类型: ' + contentType;
+                    const errorMessage = '😵 收到了奇怪的响应格式: ' + contentType;
                     resultDiv.className = 'error show';
                     resultDiv.textContent = errorMessage;
-                    messageInput.value = errorMessage;
-                    messageInput.style.borderColor = '#f5c6cb';
                 }
             } catch (err) {
-                // 详细错误诊断
-                let errorMessage = '❌ 请求失败: ' + err.message;
+                // 🔧 小医生来了！让我看看哪里出问题了～
+                let errorMessage = '😢 哎呀出错了: ' + err.message;
                 
-                // 检查是否是GET/HEAD方法错误（通常是缓存问题）
+                // 🍪 检查是不是浏览器的缓存捣乱了
                 if (err.message.includes('GET/HEAD method cannot have body') || err.message.includes('Request with GET/HEAD')) {
-                    errorMessage += '\n\n⚠️ 这是浏览器缓存问题！\n\n解决方案：\n1. 按 Ctrl+F5 (Windows) 或 Cmd+Shift+R (Mac) 强制刷新\n2. 或清除浏览器缓存\n3. 或在开发者工具中禁用缓存\n   (F12 → Network标签 → 勾选"Disable cache")\n4. 然后刷新页面重试';
+                    errorMessage += '\n\n🍪 哎呀！浏览器记住旧版本啦！\n\n💝 试试这些小方法：\n1. 按 Ctrl+F5 (Windows) 或 Cmd+Shift+R (Mac) 强制刷新\n2. 或者清除浏览器缓存\n3. 或按 F12 打开控制台 → Network标签 → 勾选"Disable cache"\n4. 然后刷新页面重试～';
                 }
-                // 检查是否是CORS或网络问题
+                // 🌐 检查是不是网络连接的问题
                 else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
                     const isHttps = window.location.protocol === 'https:';
                     const isHttpWebhook = WEBHOOK_URL.startsWith('http://');
                     
                     if (isHttps && isHttpWebhook) {
-                        errorMessage += '\n\n⚠️ 混合内容错误：\n页面使用HTTPS，但Webhook使用HTTP。\n浏览器会阻止HTTP请求。\n\n解决方案：\n1. 将N8N配置为使用HTTPS\n2. 或使用HTTP页面（不推荐）';
+                        errorMessage += '\n\n🔐 安全小姐姐说：HTTPS 和 HTTP 不能混用哦！\n\n💝 试试这些办法：\n1. 让服务器也用 HTTPS（这样更安全哦！）\n2. 或者用 HTTP 访问页面（但不太推荐呢）';
                     } else if (err.message.includes('CORS')) {
-                        errorMessage += '\n\n⚠️ CORS错误：\n服务器未允许跨域请求。\n请检查N8N的CORS设置。';
+                        errorMessage += '\n\n🚧 哎呀！服务器小姐姐不让跨域访问...\n\n💖 解决办法：需要在 N8N 里设置允许跨域访问哦～';
                     } else {
-                        errorMessage += '\n\n可能的原因：\n1. 网络连接问题\n2. Webhook URL不正确\n3. N8N服务器未运行\n4. 防火墙阻止了请求';
+                        // 📋 详细检查清单
+                        errorMessage += '\n\n🔍 让我们一起找找问题在哪～\n\n🌐 当前连接地址：\n' + WEBHOOK_URL + '\n\n💝 可能的原因（别担心哦）：\n\n1️⃣ 服务器休息了吗？\n   → 试试访问 http://144.126.135.213:5678 看能不能打开\n\n2️⃣ 工作流忘记启动了？\n   → 登录 N8N，找到 "AI KIT GITHUB" 工作流\n   → 右上角 "Active" 开关要是绿色的才行哦～\n\n3️⃣ 地址输错了？\n   → 在浏览器直接打开：' + WEBHOOK_URL + '\n   → 如果显示 404，说明地址不对呢\n\n4️⃣ 防火墙在捣蛋？\n   → 检查服务器有没有开放 5678 端口\n   → 看看本地防火墙有没有拦截\n\n5️⃣ 网络不稳定？\n   → 试试 ping 144.126.135.213 测一下\n\n6️⃣ 跨域设置没配好？\n   → 在 N8N 环境变量加上：N8N_CORS_ORIGIN=*\n\n🎯 快速测试小技巧：\n1. 访问 http://144.126.135.213:5678\n2. 访问 ' + WEBHOOK_URL + '\n3. 按 F12 打开控制台看详细错误';
                     }
                 }
                 
                 resultDiv.className = 'error show';
                 resultDiv.textContent = errorMessage;
-                messageInput.value = errorMessage;
-                messageInput.style.borderColor = '#f5c6cb';
             } finally {
+                // 🎀 好啦，按钮又可以用了～
                 submitBtn.disabled = false;
-                btnText.textContent = '提交并生成';
+                btnText.textContent = '✨ 开始施展魔法 ✨';
             }
         });
     </script>
